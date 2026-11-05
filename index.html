@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#120a1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Moto Stunt">
+<meta name="description" content="Браузерная игра про стант на мотоциклах: вилли, стоппи, прыжки, гараж и тюнинг.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>Moto Stunt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- сенсорное управление -->
+<div id="touch" class="hidden">
+  <div class="tleft">
+    <button class="tbtn lean" data-k="back" aria-label="Наклон назад"><span>◀</span><small>НАЗАД</small></button>
+    <button class="tbtn lean" data-k="fwd" aria-label="Наклон вперёд"><span>▶</span><small>ВПЕРЁД</small></button>
+  </div>
+  <div class="tright">
+    <div class="tsmall">
+      <button class="tbtn mini" data-shift="-1" aria-label="Передача вниз">▼</button>
+      <button class="tbtn mini" data-shift="1" aria-label="Передача вверх">▲</button>
+      <button class="tbtn mini clutch" data-k="clutch" aria-label="Сцепление">СЦ</button>
+    </div>
+    <button class="tbtn brake" data-k="brake" aria-label="Тормоз">ТОРМОЗ</button>
+    <button class="tbtn gas" data-k="gas" aria-label="Газ">ГАЗ</button>
+  </div>
+</div>
+<button id="pauseBtn" class="hidden" aria-label="Пауза">II</button>
+
+<!-- главное меню -->
+<div id="menu" class="screen">
+  <div class="logo"><b>MOTO</b><i>STUNT</i></div>
+  <div class="tag">король заднего колеса</div>
+  <div class="coins">🪙 <span class="coinv">0</span></div>
+  <div class="menu-btns">
+    <button class="btn big" data-go="tracks">ЕХАТЬ</button>
+    <button class="btn" data-go="garage">ГАРАЖ</button>
+    <button class="btn" data-go="settings">НАСТРОЙКИ</button>
+    <button class="btn" data-go="help">КАК ИГРАТЬ</button>
+  </div>
+  <div class="menu-foot"><button class="link" id="fsBtn">⛶ На весь экран</button> · <button class="link" data-go="credits">Музыка и авторы</button></div>
+</div>
+
+<!-- выбор трассы -->
+<div id="tracks" class="screen">
+  <div class="bar"><button class="btn back" data-go="menu">◀</button><h2>ТРАССЫ</h2><div class="coins">🪙 <span class="coinv">0</span></div></div>
+  <div id="trackList" class="cards"></div>
+</div>
+
+<!-- гараж -->
+<div id="garage" class="screen">
+  <div class="bar"><button class="btn back" data-go="menu">◀</button><h2>ГАРАЖ</h2><div class="coins">🪙 <span class="coinv">0</span></div></div>
+  <div class="gwrap">
+    <div class="gleft">
+      <canvas id="preview"></canvas>
+      <button class="arrow l" id="gPrev">◀</button><button class="arrow r" id="gNext">▶</button>
+      <div class="gname"><b id="gName"></b><span id="gCls"></span></div>
+    </div>
+    <div class="gright">
+      <div class="tabs">
+        <button class="tab on" data-tab="bike">МОТО</button>
+        <button class="tab" data-tab="tune">ТЮНИНГ</button>
+        <button class="tab" data-tab="paint">ПОКРАСКА</button>
+        <button class="tab" data-tab="rider">РАЙДЕР</button>
+      </div>
+      <div id="gPanel" class="panel"></div>
+    </div>
+  </div>
+</div>
+
+<!-- настройки -->
+<div id="settings" class="screen">
+  <div class="bar"><button class="btn back" data-go="menu">◀</button><h2>НАСТРОЙКИ</h2><div></div></div>
+  <div class="panel narrow">
+    <label class="row">Музыка <input type="range" id="sMusic" min="0" max="1" step="0.05"></label>
+    <label class="row">Звук мотора <input type="range" id="sSfx" min="0" max="1" step="0.05"></label>
+    <label class="row">Коробка передач
+      <span class="seg"><button data-man="0">АВТО</button><button data-man="1">РУЧНАЯ</button></span></label>
+    <label class="row">Подсказки в заезде <span class="seg"><button data-hint="1">ВКЛ</button><button data-hint="0">ВЫКЛ</button></span></label>
+    <div class="row"><span>Прогресс</span><button class="btn small danger" id="resetBtn">СБРОСИТЬ</button></div>
+  </div>
+</div>
+
+<!-- помощь -->
+<div id="help" class="screen">
+  <div class="bar"><button class="btn back" data-go="menu">◀</button><h2>КАК ИГРАТЬ</h2><div></div></div>
+  <div class="panel narrow help">
+    <p><b>Вилли.</b> Дай газу — переднее колесо поднимется. Держи его в <span class="g">зелёной зоне</span> индикатора угла: это точка баланса, там очки идут ×1.6. Перевалил в красную — падение.</p>
+    <p><b>Как ловить баланс.</b> Колесо падает — добавь газ или отклонись назад. Колесо задирается — сбрось газ, нажми тормоз (задний опустит перед) или наклонись вперёд.</p>
+    <p><b>Сцепление.</b> Выжми сцепление, раскрути мотор и резко отпусти — тяжёлые байки встанут на заднее колесо.</p>
+    <p><b>Трюки.</b> Стоппи (тормоз на скорости), прыжки, сальто в воздухе (наклон назад/вперёд), посадка сразу в вилли. Несколько трюков подряд — комбо с множителем до ×4. Упал — комбо сгорает.</p>
+    <p><b>Клавиатура:</b> ↑/W газ · ↓/S тормоз · ←/A назад · →/D вперёд · Пробел сцепление · Q/E передачи (ручная коробка) · R заново · Esc пауза.</p>
+    <p><b>Телефон:</b> держи горизонтально. Слева наклон, справа газ и тормоз, «СЦ» — сцепление.</p>
+    <p>За заезд дают монеты: трать в гараже на новые мотоциклы, тюнинг и выхлоп.</p>
+  </div>
+</div>
+
+<!-- авторы -->
+<div id="credits" class="screen">
+  <div class="bar"><button class="btn back" data-go="menu">◀</button><h2>МУЗЫКА</h2><div></div></div>
+  <div class="panel narrow" id="creditList"></div>
+</div>
+
+<!-- пауза -->
+<div id="pause" class="screen dim">
+  <h2>ПАУЗА</h2>
+  <div class="menu-btns">
+    <button class="btn big" id="resumeBtn">ПРОДОЛЖИТЬ</button>
+    <button class="btn" id="restartBtn">ЗАНОВО</button>
+    <button class="btn" id="quitBtn">В МЕНЮ</button>
+  </div>
+</div>
+
+<!-- итоги -->
+<div id="result" class="screen dim">
+  <h2 id="rTitle">ФИНИШ!</h2>
+  <div class="rscore" id="rScore">0</div>
+  <div class="rbadge hidden" id="rRec">НОВЫЙ РЕКОРД ТРАССЫ!</div>
+  <div class="rstats" id="rStats"></div>
+  <div class="menu-btns row3">
+    <button class="btn big" id="againBtn">ЕЩЁ РАЗ</button>
+    <button class="btn" data-go="garage">ГАРАЖ</button>
+    <button class="btn" data-go="tracks">ТРАССЫ</button>
+  </div>
+</div>
+
+<div id="rotate"><div class="phone">📱</div><p>Поверни телефон горизонтально</p></div>
+<div id="toast"></div>
+
+<script src="js/data.js?v=2"></script>
+<script src="js/physics.js?v=2"></script>
+<script src="js/draw.js?v=2"></script>
+<script src="js/audio.js?v=2"></script>
+<script src="js/game.js?v=2"></script>
+<script src="js/ui.js?v=2"></script>
+</body>
+</html>
