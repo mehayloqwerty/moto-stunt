@@ -13,7 +13,7 @@ const Sound = (() => {
     if (!AC) return;
     ctx = new AC();
     master = ctx.createGain(); master.gain.value = sfxVol; master.connect(ctx.destination);
-    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -10; comp.ratio.value = 3; comp.attack.value = 0.002;
     sfxBus = ctx.createGain(); sfxBus.connect(comp); comp.connect(master);
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -105,13 +105,13 @@ const Sound = (() => {
     const t = ctx.currentTime, loud = eng ? eng.loud : 0;
     const s = ctx.createBufferSource(); s.buffer = noiseBuf;
     const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = big ? 500 + Math.random() * 300 : 1200 + Math.random() * 2200; f.Q.value = big ? 0.8 : 1.5;
-    const g = ctx.createGain(); const v = (big ? 0.9 : 0.35 + Math.random() * 0.3) * (0.6 + loud * 0.6);
+    const g = ctx.createGain(); const v = (big ? 1.3 : 0.5 + Math.random() * 0.35) * (0.75 + loud * 0.7);
     const dur = big ? 0.09 : 0.012 + Math.random() * 0.02;
     g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
     s.connect(f); f.connect(g); g.connect(sfxBus); s.start(t, Math.random() * 1.5); s.stop(t + dur + 0.02);
     if (big) { // низкий «бух»
       const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
-      const og = ctx.createGain(); og.gain.setValueAtTime(0.7 * (0.6 + loud * 0.6), t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+      const og = ctx.createGain(); og.gain.setValueAtTime(1.1 * (0.75 + loud * 0.7), t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
       o.connect(og); og.connect(sfxBus); o.start(t); o.stop(t + 0.16);
     }
   }
@@ -138,7 +138,7 @@ const Sound = (() => {
     eng.shelf.gain.setTargetAtTime(6 + loud * 9 + throttle * 4, t, 0.05);
     eng.bp.frequency.setTargetAtTime(400 + 1800 * r, t, tc);
     eng.ng.gain.setTargetAtTime(0.02 + throttle * 0.08 * (0.4 + r), t, tc);
-    let vol = (0.14 + 0.2 * throttle + 0.12 * r) * (0.85 + loud * 0.55);
+    let vol = (0.22 + 0.3 * throttle + 0.18 * r) * (0.9 + loud * 0.7);
     if (limiter > 0) vol *= 0.55 + Math.random() * 0.45;
     eng.out.gain.setTargetAtTime(vol, t, 0.03);
     // откаты: резкий сброс газа на оборотах → серия треска и хлопков
@@ -151,7 +151,9 @@ const Sound = (() => {
       const rate = (14 + loud * 26) * Math.min(1, eng.crackle + 0.2);
       if (Math.random() < rate * dt) { const big = Math.random() < 0.12 + loud * 0.18; crackle(big); pop = big || Math.random() < 0.3; }
     }
-    if (limiter > 0 && Math.random() < 0.1 + loud * 0.15) { crackle(false); pop = true; }
+    // отсечка: очередь выстрелов из глушителя
+    eng.limT = (eng.limT || 0) - dt;
+    if (limiter > 0 && eng.limT <= 0) { eng.limT = 0.05 + Math.random() * 0.05; const big = Math.random() < 0.45 + loud * 0.35; crackle(big); if (Math.random() < 0.5) crackle(false); pop = true; }
     return pop;
   }
 
@@ -204,14 +206,14 @@ const Sound = (() => {
     if (curTrack === name && !player.paused) return;
     curTrack = name;
     player.src = 'music/' + name + '.m4a';
-    player.volume = musicVol * 0.4;
+    player.volume = musicVol * 0.22;
     player.play().catch(() => {});
   }
   function stopMusic() { player.pause(); }
   function resumeMusic() { if (curTrack && musicVol > 0) { if (!player.src) player.src = 'music/' + curTrack + '.m4a'; player.play().catch(() => {}); } }
   function setVolumes(m, s) {
     musicVol = m; sfxVol = s;
-    player.volume = m * 0.4;
+    player.volume = m * 0.22;
     if (m <= 0) player.pause(); else if (curTrack && player.paused) resumeMusic();
     if (master) master.gain.value = s;
   }
@@ -232,5 +234,12 @@ const Sound = (() => {
       if (t > 2.8) { clearInterval(demoT); demoT = null; stopEngine(); }
     }, 30);
   }
-  return { revDemo, init, startEngine: (d, e) => { if (demoT) { clearInterval(demoT); demoT = null; } startEngine(d, e); }, stopEngine, updateEngine, sfx, setScrape, music, stopMusic, resumeMusic, setVolumes, suspend };
+  // очередь выстрелов (переключение вверх / отсечка)
+  function backfire(n) {
+    if (!eng || !ctx || eng.def.electric) return false;
+    const k = n || 2 + Math.floor(Math.random() * 2 + eng.loud * 3);
+    for (let i = 0; i < k; i++) setTimeout(() => crackle(i === 0 || Math.random() < 0.35 + eng.loud * 0.3), i * (35 + Math.random() * 30));
+    return true;
+  }
+  return { backfire, revDemo, init, startEngine: (d, e) => { if (demoT) { clearInterval(demoT); demoT = null; } startEngine(d, e); }, stopEngine, updateEngine, sfx, setScrape, music, stopMusic, resumeMusic, setVolumes, suspend };
 })();

@@ -160,7 +160,7 @@ const Game = {
     this.flame = pop ? 1 : Math.max(0, (this.flame || 0) - dt * 8);
     if (b.limiter > 0 && Math.random() < 0.3) this.flame = 0.7;
     Sound.setScrape(b.scrape, b.slipAmt > 0.15 && ter.track.theme !== 'desert' ? b.slipAmt : 0);
-    if (this._gear !== b.gear) { if (this._gear !== undefined) Sound.sfx.shift(); this._gear = b.gear; }
+    if (this._gear !== b.gear) { if (this._gear !== undefined) { Sound.sfx.shift(); if (b.gear > this._gear && Sound.backfire()) this.flame = 1; } this._gear = b.gear; }
     // частицы
     const wr = b.wr;
     if (wr.contact && b.slipAmt > 0.22) {
@@ -342,7 +342,7 @@ const Game = {
     ctx.fillStyle = THEMES.sunset.road; ctx.fillRect(x0, -0.5, x1 - x0, 0.5);
     ctx.setLineDash([1.5, 1.8]); ctx.lineDashOffset = 0; ctx.strokeStyle = '#e8d27a'; ctx.lineWidth = 0.06; ctx.beginPath(); ctx.moveTo(x0 - (x0 % 3.3), -0.28); ctx.lineTo(x1, -0.28); ctx.stroke(); ctx.setLineDash([]);
     // мотоцикл в вечном вилли
-    const bx = camX - (W / k) * 0.12;
+    const bx = camX + (W / k) * 0.2;
     const ang = 0.62 + Math.sin(this.menuT * 1.3) * 0.08;
     const rr = def.rr, [cx, cy] = def.com;
     const c = Math.cos(ang), s = Math.sin(ang);

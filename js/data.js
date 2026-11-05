@@ -12,7 +12,7 @@ const BIKES = [
     desc: 'Маленький, лёгкий и бесстрашный. Для первого вилли — идеально.',
     wb: 1.15, rr: 0.27, rf: 0.30, mass: 72, com: [0.50, 0.46], gyr: 0.46,
     torque: 12, peak: 7000, redline: 9500, idle: 1500, curve: 0.45, cyl: 1,
-    gears: [31, 21, 15.7, 12.3],
+    gears: [31, 21, 15.5, 11.6, 8.4],
     brakeF: 700, brakeR: 380, travelF: 0.16, travelR: 0.15, rake: 26, forkLen: 0.62,
     grip: 1.0, lean: 1.0, sound: 'single',
     paint: '#ff7a1a', paint2: '#ffffff', rim: '#222222'
@@ -32,7 +32,7 @@ const BIKES = [
     desc: 'Лёгкий, резкий, с бешеным низом. Король ровной вилли.',
     wb: 1.47, rr: 0.30, rf: 0.30, mass: 114, com: [0.65, 0.50], gyr: 0.5,
     torque: 45, peak: 8000, redline: 11000, idle: 1700, curve: 0.35, cyl: 1,
-    gears: [20.9, 16.1, 13, 10.9, 9.4],
+    gears: [20.9, 15.6, 12.4, 10.0, 8.3, 7.0],
     brakeF: 1500, brakeR: 600, travelF: 0.24, travelR: 0.25, rake: 26, forkLen: 0.8,
     grip: 1.05, lean: 1.0, sound: 'single',
     paint: '#e8ff2a', paint2: '#1b1b1b', rim: '#ff2a6d'
@@ -129,25 +129,25 @@ const VISORS = ['#1c2733', '#ffb300', '#3fa9ff', '#c0c0c0', '#ff3b7a'];
 // Трассы: тема фона, сцепление покрытия, длина и набор препятствий
 const TRACKS = [
   { id: 'embank', name: 'Набережная', theme: 'sunset', mu: 1.1, len: 1100, seed: 11, music: 'ride1',
-    desc: 'Закат, ровный асфальт и пара трамплинов. Здесь ставят рекорды вилли.',
-    mix: { flat: 5, roll: 3, kicker: 2, table: 2, whoops: 1 } },
+    desc: 'Закат и идеально ровный асфальт. Здесь ставят рекорды вилли.',
+    mix: { flat: 1 } },
   { id: 'canyon', name: 'Красный каньон', theme: 'desert', mu: 0.85, len: 1300, seed: 23, music: 'ride2',
-    desc: 'Грунт, холмы и прыжки через обрывы. Резина буксует — газ плавно!',
-    mix: { flat: 2, roll: 3, hill: 3, gap: 3, table: 2, whoops: 2, climb: 2 } },
+    desc: 'Ровный укатанный грунт. Резина буксует — газ плавно!',
+    mix: { flat: 1 } },
   { id: 'port', name: 'Ночной порт', theme: 'night', mu: 1.0, len: 1200, seed: 37, music: 'ride3',
-    desc: 'Контейнеры, рампы и мокрый асфальт под фонарями.',
-    mix: { flat: 3, step: 3, kicker: 2, gap: 2, table: 2, roll: 1 } },
+    desc: 'Ночь, фонари и ровный асфальт вдоль причала.',
+    mix: { flat: 1 } },
   { id: 'pass', name: 'Горный перевал', theme: 'mountain', mu: 0.95, len: 1500, seed: 51, music: 'ride4',
-    desc: 'Крутые подъёмы и спуски среди сосен. Длинная и злая.',
-    mix: { climb: 3, descent: 3, hill: 3, roll: 2, gap: 2, table: 1, whoops: 1 } }
+    desc: 'Длинная ровная дорога среди сосен. Марафон на заднем колесе.',
+    mix: { flat: 1 } }
 ];
 
 const CREDITS = [
-  ['Меню', 'Sport Rock Energetic Intro', 'AudioERA', 'https://pixabay.com/music/rock-sport-rock-energetic-intro-628912/'],
-  ['Набережная', 'Uplifting Action Sport Energetic Rock', 'ikoliks', 'https://pixabay.com/music/rock-uplifting-action-sport-energetic-rock-619094/'],
-  ['Красный каньон', 'Punk Rock Rebellion Fast Energy', 'echoes_of_lumen', 'https://pixabay.com/music/rock-punk-rock-rebellion-fast-energy-589273/'],
-  ['Ночной порт', 'Surf Rock', 'alex-morgan', 'https://pixabay.com/music/rock-surf-rock-591326/'],
-  ['Горный перевал', 'Rock Music', 'The_Mountain', 'https://pixabay.com/music/rock-rock-rock-music-576586/']
+  ['Меню', 'Luxury Music', 'vaitsez', 'https://pixabay.com/music/trap-luxury-luxury-music-570110/'],
+  ['Набережная', 'Brazilian Phonk Bounce Heat', 'alex-morgan', 'https://pixabay.com/music/phonk-brazilian-phonk-bounce-heat-573874/'],
+  ['Красный каньон', 'West Coast Trap Beat', 'SountrixAudio', 'https://pixabay.com/music/beats-west-coast-trap-beat-434659/'],
+  ['Ночной порт', 'Trap Hype', 'SolarFLEX', 'https://pixabay.com/music/trap-trap-trap-hype-589000/'],
+  ['Горный перевал', 'Aggressive Trap Beat', 'vaitsez', 'https://pixabay.com/music/trap-aggressive-trap-beat-607373/']
 ];
 
 // ---------- Сохранение ----------
@@ -162,7 +162,7 @@ function defaultSave() {
     coins: 600, bike: 'pika', bikes,
     rider: { helmet: '#f4f4f4', helmet2: '#d71f2b', hstyle: 'stripe', visor: '#1c2733', jacket: '#b3261e', pants: '#1d2433' },
     best: {}, bestWheelie: 0, bestWheelieDist: 0, totalRuns: 0,
-    settings: { music: 0.5, sfx: 0.8, manual: false, hints: true }
+    settings: { music: 0.35, sfx: 0.9, manual: false, hints: true, test: false }
   };
 }
 let SAVE = loadSave();
@@ -180,7 +180,7 @@ function loadSave() {
       out.bikes[b.id] = Object.assign(def, (s.bikes || {})[b.id] || {});
       out.bikes[b.id].upg = Object.assign(def.upg, ((s.bikes || {})[b.id] || {}).upg || {});
     }
-    if (!out.bikes[out.bike] || !out.bikes[out.bike].owned) out.bike = 'pika';
+    if (!out.bikes[out.bike] || (!out.bikes[out.bike].owned && !out.settings.test)) out.bike = 'pika';
     return out;
   } catch (e) { return d; }
 }

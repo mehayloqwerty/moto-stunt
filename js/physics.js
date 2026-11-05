@@ -25,7 +25,7 @@ class Terrain {
     const base = () => y;
     const surf = track.theme === 'desert' ? 'dirt' : (track.theme === 'mountain' ? 'mix' : 'road');
     P(-60, 0, surf);
-    const flat = L => { const b = base(); const n = Math.max(1, Math.round(L / 3)); for (let i = 1; i <= n; i++) P(x + L / n, b + (surf === 'dirt' ? (rnd() - 0.5) * 0.06 : 0), surf); this.ys[this.ys.length - 1] = b; y = b; };
+    const flat = L => { const b = base(); const n = Math.max(1, Math.round(L / 3)); for (let i = 1; i <= n; i++) P(x + L / n, b, surf); this.ys[this.ys.length - 1] = b; y = b; };
     const curve = (L, fn, tag, step) => { const x0 = x, b = base(); const n = Math.max(2, Math.ceil(L / (step || 0.6))); for (let i = 1; i <= n; i++) { const t = i / n; P(x0 + L * t, b + fn(t), tag || surf); } };
     const R = (a, b) => a + rnd() * (b - a);
     flat(110);
@@ -40,9 +40,9 @@ class Terrain {
       last = kind;
       switch (kind) {
         case 'flat': flat(R(30, 70)); break;
-        case 'roll': { const L = R(40, 80), amp = R(0.3, 0.9), n = Math.max(1, Math.round(L / R(14, 24))); curve(L, t => amp * (1 - Math.cos(2 * Math.PI * n * t)) / 2); flat(10); break; }
-        case 'hill': { const L = R(26, 46), h = R(1.8, 4.5); curve(L, t => h * (1 - Math.cos(2 * Math.PI * t)) / 2); flat(12); break; }
-        case 'whoops': { const n = 5 + Math.floor(rnd() * 5), amp = R(0.25, 0.45); curve(n * 3.6, t => amp * (1 - Math.cos(2 * Math.PI * n * t)) / 2, surf, 0.3); flat(15); break; }
+        case 'roll': { const L = R(50, 90), amp = R(0.12, 0.35), n = Math.max(1, Math.round(L / R(25, 40))); curve(L, t => amp * (1 - Math.cos(2 * Math.PI * n * t)) / 2); flat(10); break; }
+        case 'hill': { const L = R(40, 65), h = R(1.5, 3.5); curve(L, t => h * (1 - Math.cos(2 * Math.PI * t)) / 2); flat(12); break; }
+        case 'whoops': { const n = 3 + Math.floor(rnd() * 3), amp = R(0.08, 0.15); curve(n * 6, t => amp * (1 - Math.cos(2 * Math.PI * n * t)) / 2, surf, 0.4); flat(15); break; }
         case 'kicker': { const h = R(0.8, 1.5), L = h * 2.6; const rx = x; curve(L, t => h * t * t, 'ramp', 0.2); this.ramps.push([rx, x]); P(x + 0.04, base() - h, surf); flat(R(30, 45)); break; }
         case 'table': { const h = R(1.2, 2.4), L = h * 2.8; const rx = x; curve(L, t => h * t * t, 'ramp', 0.25); const top = R(7, 15); const b = base(); P(x + top, b, 'ramp'); curve(h * 3.4, t => -h * (1 - Math.cos(Math.PI * t)) / 2, 'ramp', 0.3); this.ramps.push([rx, x]); flat(R(25, 40)); break; }
         case 'gap': { const h = R(1.2, 2.2), L = h * 2.7, gp = R(5, 11); const rx = x; curve(L, t => h * t * t, 'ramp', 0.2); const b = base(); P(x + 0.04, b - h - 5, 'pit'); P(x + gp, b - h - 5, 'pit'); P(x + 0.04, b - 0.12, 'ramp'); curve(h * 4, t => -(h - 0.12) * (1 - Math.cos(Math.PI * t)) / 2, 'ramp', 0.3); this.ramps.push([rx, x]); flat(R(25, 40)); break; }
@@ -219,8 +219,8 @@ class Bike {
     if (auto && !d.electric && this.shiftT <= 0) {
       const wheelRpm = -this.wr.w * 30 / Math.PI;
       const rpmIn = (g) => wheelRpm * d.gears[g];
-      const synced = this.clutch < 0.1 && this.slipAmt < 0.15 && Math.abs(this.rpm - rpmIn(this.gear)) < 900;
-      if (synced && this.gear < d.gears.length - 1 && this.rpm > d.redline * 0.93 && rpmIn(this.gear + 1) > d.idle * 1.4 && this.throttle > 0.3) this.shift(1);
+      const synced = this.clutch < 0.1 && Math.abs(this.rpm - rpmIn(this.gear)) < d.redline * 0.25;
+      if (synced && this.gear < d.gears.length - 1 && this.rpm > d.redline * 0.997 && rpmIn(this.gear + 1) > d.idle * 1.4 && this.throttle > 0.1) this.shift(1);
       else if (this.clutch < 0.1 && this.gear > 0 && rpmIn(this.gear - 1) < d.redline * 0.7 && rpmIn(this.gear) < Math.max(d.idle * 1.8, d.peak * 0.45)) this.shift(-1);
     }
     this.scrape = 0; this.touch = {};

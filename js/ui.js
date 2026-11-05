@@ -61,10 +61,11 @@ const UI = {
   // ---------- гараж ----------
   buildGarage() {
     const b = BIKES[this.gIdx], st = SAVE.bikes[b.id];
-    $('#gName').textContent = b.name; $('#gCls').textContent = b.cls + (st.owned ? '' : ' · ' + b.price.toLocaleString('ru-RU') + ' 🪙');
+    const test = !!SAVE.settings.test, own = st.owned || test;
+    $('#gName').textContent = b.name; $('#gCls').textContent = b.cls + (own ? (test && !st.owned ? ' · ТЕСТ' : '') : ' · ' + b.price.toLocaleString('ru-RU') + ' 🪙');
     $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === this.tab));
     const P = $('#gPanel');
-    const lockNote = st.owned ? '' : `<p class="note">Этот мотоцикл ещё не куплен — сначала купи его на вкладке МОТО.</p>`;
+    const lockNote = own ? '' : `<p class="note">Этот мотоцикл ещё не куплен — сначала купи его на вкладке МОТО.</p>`;
     if (this.tab === 'bike') {
       const hp = bikeHP(b, st), mt = b.mass + RIDER_MASS;
       const wheelie = (b.torque * b.gears[0] / b.rr) / (mt * G) / (b.com[0] / (b.com[1] + b.rr));
@@ -76,7 +77,7 @@ const UI = {
         bar('Скорость', ts, 320, ts + ' км/ч') + bar('Вилли', wheelie, 2, wheelie > 1.35 ? 'легко' : wheelie > 1 ? 'норм' : 'сложно') +
         bar('Тормоза', b.brakeF, 2200, Math.round(b.brakeF / 22) + '%') + bar('Подвеска', b.travelF, 0.32, Math.round(b.travelF * 1000) + ' мм') +
         `<div class="stat"><span>Точка баланса</span><div></div><em>${bal}°</em></div>` +
-        `<div class="gact">${st.owned ? (SAVE.bike === b.id ? '<span class="owned">✔ В ДЕЛЕ</span>' : '<button class="btn big small" id="selBtn">ВЫБРАТЬ</button>') : `<button class="btn big small" id="buyBtn" ${SAVE.coins < b.price ? 'disabled' : ''}>КУПИТЬ · ${b.price.toLocaleString('ru-RU')} 🪙</button>`}</div>`;
+        `<div class="gact">${own ? (SAVE.bike === b.id ? '<span class="owned">✔ В ДЕЛЕ</span>' : '<button class="btn big small" id="selBtn">ВЫБРАТЬ</button>') : `<button class="btn big small" id="buyBtn" ${SAVE.coins < b.price ? 'disabled' : ''}>КУПИТЬ · ${b.price.toLocaleString('ru-RU')} 🪙</button>`}</div>`;
       const sel = $('#selBtn'); if (sel) sel.onclick = () => { SAVE.bike = b.id; saveGame(); Sound.sfx.click(); this.buildGarage(); };
       const buy = $('#buyBtn'); if (buy) buy.onclick = () => {
         if (SAVE.coins < b.price) return;
@@ -86,25 +87,25 @@ const UI = {
       P.innerHTML = lockNote + UPGRADES.map(u => {
         const lvl = st.upg[u.id], cost = upgradeCost(b, lvl);
         const pips = Array.from({ length: UPG_MAX }, (_, i) => `<i class="${i < lvl ? 'on' : ''}"></i>`).join('');
-        const btn = lvl >= UPG_MAX ? '<span class="owned">МАКС</span>' : `<button class="btn small" data-upg="${u.id}" ${!st.owned || SAVE.coins < cost ? 'disabled' : ''}>${cost.toLocaleString('ru-RU')} 🪙</button>`;
+        const btn = lvl >= UPG_MAX ? '<span class="owned">МАКС</span>' : `<button class="btn small" data-upg="${u.id}" ${!own || (!test && SAVE.coins < cost) ? 'disabled' : ''}>${test ? 'БЕСПЛАТНО' : cost.toLocaleString('ru-RU') + ' 🪙'}</button>`;
         return `<div class="upg"><b>${u.name}</b>${btn}<div class="pips">${pips}</div><small>${u.hint}</small></div>`;
       }).join('');
       P.querySelectorAll('[data-upg]').forEach(el => el.onclick = () => {
         const id = el.dataset.upg, lvl = st.upg[id], cost = upgradeCost(b, lvl);
-        if (SAVE.coins < cost || lvl >= UPG_MAX) return;
-        SAVE.coins -= cost; st.upg[id]++; saveGame(); Sound.sfx.buy(); this.show('garage');
+        if ((!test && SAVE.coins < cost) || lvl >= UPG_MAX) return;
+        if (!test) SAVE.coins -= cost; st.upg[id]++; saveGame(); Sound.sfx.buy(); this.show('garage');
       });
     } else if (this.tab === 'paint') {
       const sw = (key, list) => `<div class="sw">${list.map(c => `<button class="c ${st[key] === c ? 'on' : ''}" style="background:${c}" data-k="${key}" data-v="${c}" aria-label="${c}"></button>`).join('')}<input type="color" data-k="${key}" value="${st[key]}" aria-label="Свой цвет"></div>`;
       P.innerHTML = lockNote +
         `<div class="opt"><h4>Краска</h4>${sw('paint', PALETTE)}<h4>Второй цвет</h4>${sw('paint2', PALETTE)}<h4>Диски</h4>${sw('rim', PALETTE)}` +
         `<h4>Наклейки</h4><div class="sw">${DECALS.map(d => `<button class="o ${st.decal === d.id ? 'on' : ''}" data-k="decal" data-v="${d.id}">${d.name}</button>`).join('')}</div>` +
-        (b.electric ? '' : `<h4>Выхлоп</h4><div class="sw">${EXHAUSTS.map(e => { const own = st.exhOwned.includes(e.id); return `<button class="o ${st.exhaust === e.id ? 'on' : ''}" data-ex="${e.id}">${e.name}${e.power ? ' +' + Math.round(e.power * 100) + '%' : ''}${own ? '' : ' · ' + e.price + ' 🪙'}</button>`; }).join('')}</div>`) + '</div>';
-      this.bindSwatches(P, st, !st.owned);
+        (b.electric ? '' : `<h4>Выхлоп</h4><div class="sw">${EXHAUSTS.map(e => { const own = st.exhOwned.includes(e.id); return `<button class="o ${st.exhaust === e.id ? 'on' : ''}" data-ex="${e.id}">${e.name}${e.power ? ' +' + Math.round(e.power * 100) + '%' : ''}${own || test ? '' : ' · ' + e.price + ' 🪙'}</button>`; }).join('')}</div>`) + '</div>';
+      this.bindSwatches(P, st, !own);
       P.querySelectorAll('[data-ex]').forEach(el => el.onclick = () => {
-        if (!st.owned) return;
+        if (!own) return;
         const e = EXHAUSTS.find(x => x.id === el.dataset.ex);
-        if (!st.exhOwned.includes(e.id)) {
+        if (!st.exhOwned.includes(e.id) && !test) {
           if (SAVE.coins < e.price) { this.toast('Не хватает монет'); return; }
           SAVE.coins -= e.price; st.exhOwned.push(e.id); Sound.sfx.buy();
         } else Sound.sfx.click();
@@ -185,6 +186,18 @@ $('#fsBtn').onclick = () => {
   if (p && p.then) p.then(() => { try { screen.orientation.lock('landscape').catch(() => {}); } catch (e) {} }).catch(() => UI.toast('Браузер не разрешил полный экран — добавь игру на главный экран'));
   else if (!p) UI.toast('На iPhone: Поделиться → «На экран Домой»');
 };
+function syncTest() {
+  const on = !!SAVE.settings.test;
+  $('#testBtn').textContent = 'ТЕСТ-РЕЖИМ: ' + (on ? 'ВКЛ' : 'ВЫКЛ');
+  $('#testBtn').classList.toggle('on', on);
+}
+$('#testBtn').onclick = () => {
+  SAVE.settings.test = !SAVE.settings.test;
+  if (!SAVE.settings.test && !SAVE.bikes[SAVE.bike].owned) SAVE.bike = BIKES.find(b => SAVE.bikes[b.id].owned).id;
+  saveGame(); Sound.init(); Sound.sfx.click(); syncTest();
+  UI.toast(SAVE.settings.test ? 'Тест-режим: все мотоциклы открыты, тюнинг бесплатно' : 'Тест-режим выключен');
+};
+syncTest();
 $('#gPrev').onclick = () => { UI.gIdx = (UI.gIdx + BIKES.length - 1) % BIKES.length; Sound.sfx.click(); UI.buildGarage(); };
 $('#gNext').onclick = () => { UI.gIdx = (UI.gIdx + 1) % BIKES.length; Sound.sfx.click(); UI.buildGarage(); };
 $$('.tab').forEach(t => t.onclick = () => { UI.tab = t.dataset.tab; Sound.sfx.click(); UI.buildGarage(); });

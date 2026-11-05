@@ -12,13 +12,13 @@ button { font-family: inherit; color: inherit; cursor: pointer; border: 0; backg
 
 /* меню */
 #menu { justify-content: center; background: radial-gradient(ellipse at 30% 50%, rgba(0,0,0,0.0), rgba(0,0,0,0.45)); align-items: flex-start; padding-left: max(5vw, env(safe-area-inset-left)); }
-.logo { font-size: min(13vw, 17vh); line-height: 0.85; letter-spacing: 0.02em; transform: skewX(-10deg); text-shadow: 0 6px 0 rgba(0,0,0,0.35); }
+.logo { font-size: min(12vw, 14vh); line-height: 0.85; letter-spacing: 0.02em; transform: skewX(-10deg); text-shadow: 0 6px 0 rgba(0,0,0,0.35); }
 .logo b { display: block; color: #fff; font-weight: normal; }
 .logo i { display: block; font-style: normal; background: linear-gradient(180deg, #ffe14a, #ff7a1a 60%, #ff3b6b); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .tag { margin: 1vh 0 1.5vh 0.5vw; font-size: min(3vw, 3.6vh); color: #ffd9a8; letter-spacing: 0.12em; text-transform: uppercase; }
 .coins { font-size: min(3vw, 4vh); color: var(--acc); background: rgba(0,0,0,0.4); padding: 0.3em 0.8em; border-radius: 999px; white-space: nowrap; }
 #menu .coins { margin-bottom: 2vh; }
-.menu-btns { display: flex; flex-direction: column; gap: 1.4vh; min-width: min(40vw, 340px); }
+.menu-btns { display: flex; flex-direction: column; gap: 1.2vh; min-width: min(40vw, 340px); }
 .menu-btns.row3 { flex-direction: row; flex-wrap: wrap; justify-content: center; }
 .btn { background: linear-gradient(180deg, #2c2140, #1b1329); border: 2px solid var(--line); padding: 0.55em 1.4em; font-size: min(3.2vw, 4.4vh); border-radius: 10px; transform: skewX(-8deg); transition: transform .08s, background .15s; text-align: center; box-shadow: 0 4px 0 rgba(0,0,0,0.35); }
 .btn:hover { background: linear-gradient(180deg, #3b2c56, #241838); }
@@ -123,11 +123,25 @@ body:not(.manual) .tbtn[data-shift] { display: none; }
 #rotate .phone { font-size: 64px; animation: rot 1.8s ease-in-out infinite; }
 @keyframes rot { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
 @media (orientation: portrait) and (pointer: coarse) { #rotate { display: flex; } }
-#toast { position: fixed; left: 50%; bottom: 8vh; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 0.6em 1.2em; border-radius: 10px; font-size: min(2.2vw, 3.4vh); opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 60; }
+#toast { position: fixed; left: 50%; top: 6vh; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 0.6em 1.2em; border-radius: 10px; font-size: min(2.2vw, 3.4vh); opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 60; }
 #toast.on { opacity: 1; }
 
 @media (max-aspect-ratio: 4/3) {
   .cards { grid-template-columns: repeat(2, 1fr); }
   .gwrap { flex-direction: column; }
   .gleft { flex: 0 0 38vh; }
+}
+
+.btn.test { font-size: min(2.4vw, 3.4vh); border-style: dashed; }
+.btn.test.on { background: linear-gradient(180deg, #1f8f5a, #126b41); border-color: #7dffbe; }
+@media (max-height: 520px) {
+  .logo { font-size: 12vh; }
+  .tag { margin: 0.5vh 0 1vh; }
+  #menu .coins { margin-bottom: 1.2vh; }
+  #menu .menu-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6vh 1.2vw; min-width: min(52vw, 440px); }
+  #menu .menu-btns .big { grid-column: span 2; }
+  #menu .menu-btns .test { grid-column: span 2; }
+  .menu-btns .btn { font-size: 4vh; }
+  .menu-btns .btn.big { font-size: 5.4vh; }
+  .menu-foot { margin-top: 1.4vh; }
 }
