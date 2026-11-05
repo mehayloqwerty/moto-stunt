@@ -109,6 +109,7 @@ const UI = {
           SAVE.coins -= e.price; st.exhOwned.push(e.id); Sound.sfx.buy();
         } else Sound.sfx.click();
         st.exhaust = e.id; saveGame(); this.show('garage');
+        Sound.revDemo(b, e);
       });
     } else {
       const R = SAVE.rider;
