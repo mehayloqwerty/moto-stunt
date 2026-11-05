@@ -11,7 +11,7 @@ const BIKES = [
     id: 'pika', name: 'Pika 125', cls: 'Питбайк', price: 0, style: 'pit',
     desc: 'Маленький, лёгкий и бесстрашный. Для первого вилли — идеально.',
     wb: 1.15, rr: 0.27, rf: 0.30, mass: 72, com: [0.50, 0.46], gyr: 0.46,
-    torque: 12, peak: 7000, redline: 9500, idle: 1500, curve: 0.45, cyl: 1,
+    torque: 20, peak: 7000, redline: 9500, idle: 1500, curve: 0.3, cyl: 1,
     gears: [31, 21, 15.5, 11.6, 8.4],
     brakeF: 700, brakeR: 380, travelF: 0.16, travelR: 0.15, rake: 26, forkLen: 0.62,
     grip: 1.0, lean: 1.0, sound: 'single',
@@ -50,11 +50,11 @@ const BIKES = [
   {
     id: 'bison', name: 'Bison 1200', cls: 'Чоппер', price: 7000, style: 'chopper',
     desc: 'Тяжёлый V-твин с горой крутящего момента. Вилли — только для мастеров.',
-    wb: 1.72, rr: 0.33, rf: 0.34, mass: 288, com: [0.78, 0.36], gyr: 0.6,
-    torque: 110, peak: 4300, redline: 6000, idle: 900, curve: 0.22, cyl: 2,
+    wb: 1.72, rr: 0.33, rf: 0.34, mass: 288, com: [0.66, 0.46], gyr: 0.6,
+    torque: 130, peak: 4300, redline: 6000, idle: 900, curve: 0.22, cyl: 2,
     gears: [10.5, 7.4, 5.6, 4.6, 3.9],
     brakeF: 1500, brakeR: 800, travelF: 0.12, travelR: 0.09, rake: 34, forkLen: 0.95,
-    grip: 1.05, lean: 0.85, sound: 'vtwin',
+    grip: 1.45, lean: 0.85, sound: 'vtwin',
     paint: '#141414', paint2: '#c9a24a', rim: '#d8d8d8'
   },
   {
@@ -86,8 +86,80 @@ const BIKES = [
     brakeF: 2100, brakeR: 480, travelF: 0.12, travelR: 0.13, rake: 23.5, forkLen: 0.72,
     grip: 1.15, lean: 1.0, sound: 'inline4',
     paint: '#0b3cff', paint2: '#ffffff', rim: '#ffcc00'
+  },
+  {
+    id: 'gecko', name: 'Gecko 110', cls: 'Мини-байк', price: 400, style: 'pit',
+    desc: 'Крошка на 110 кубов. Поднимается от одного взгляда, но едет медленно.',
+    wb: 1.0, rr: 0.24, rf: 0.25, mass: 58, com: [0.44, 0.44], gyr: 0.42,
+    torque: 13, peak: 8000, redline: 10500, idle: 1800, curve: 0.3, cyl: 1,
+    gears: [40, 27, 20, 15.5, 12.5],
+    brakeF: 500, brakeR: 320, travelF: 0.12, travelR: 0.11, rake: 26, forkLen: 0.55,
+    grip: 1.0, lean: 1.1, sound: 'single',
+    paint: '#33d17a', paint2: '#141414', rim: '#ffd400'
+  },
+  {
+    id: 'wasp', name: 'Wasp 250 SM', cls: 'Супермото', price: 1200, style: 'sm',
+    desc: 'Лёгкий злой сингл. Лучший байк, чтобы научиться держать баланс.',
+    wb: 1.42, rr: 0.29, rf: 0.29, mass: 108, com: [0.62, 0.5], gyr: 0.48,
+    torque: 28, peak: 9000, redline: 12000, idle: 1700, curve: 0.3, cyl: 1,
+    gears: [24, 17.5, 13.8, 11.4, 9.6, 8.3],
+    brakeF: 1200, brakeR: 600, travelF: 0.22, travelR: 0.23, rake: 26, forkLen: 0.78,
+    grip: 1.05, lean: 1.1, sound: 'single',
+    paint: '#ffd400', paint2: '#141414', rim: '#141414'
+  },
+  {
+    id: 'lynx', name: 'Lynx 450 MX', cls: 'Кросс', price: 2500, style: 'enduro',
+    desc: 'Кроссовый болид: жёсткий удар мотора и длинный ход подвески.',
+    wb: 1.48, rr: 0.33, rf: 0.36, mass: 106, com: [0.66, 0.54], gyr: 0.5,
+    torque: 50, peak: 9500, redline: 12500, idle: 1900, curve: 0.3, cyl: 1,
+    gears: [22, 16.5, 13.3, 11, 9.2],
+    brakeF: 1150, brakeR: 600, travelF: 0.31, travelR: 0.32, rake: 27, forkLen: 0.88,
+    grip: 1.1, lean: 1.1, sound: 'single',
+    paint: '#ff5a1a', paint2: '#ffffff', rim: '#141414'
+  },
+  {
+    id: 'mamba', name: 'Mamba 800 SF', cls: 'Стритфайтер', price: 6000, style: 'stunt', noCage: true,
+    desc: 'Голый трёхцилиндровый стритфайтер. Тянет с самого низа и любит заднее колесо.',
+    wb: 1.40, rr: 0.31, rf: 0.30, mass: 178, com: [0.63, 0.44], gyr: 0.5,
+    torque: 86, peak: 9000, redline: 11500, idle: 1300, curve: 0.3, cyl: 3,
+    gears: [14.5, 11, 9.1, 7.8, 6.9, 6.2],
+    brakeF: 1800, brakeR: 700, travelF: 0.13, travelR: 0.14, rake: 24, forkLen: 0.72,
+    grip: 1.12, lean: 1.1, sound: 'triple',
+    paint: '#141414', paint2: '#ff2a6d', rim: '#ff2a6d'
+  },
+  {
+    id: 'titan', name: 'Titan 1300 R', cls: 'Гипернейкед', price: 12000, style: 'stunt', noCage: true,
+    desc: 'Голый V-твин с диким моментом. Вилли на третьей передаче — норма.',
+    wb: 1.47, rr: 0.31, rf: 0.30, mass: 200, com: [0.66, 0.44], gyr: 0.52,
+    torque: 140, peak: 8000, redline: 10500, idle: 1200, curve: 0.25, cyl: 2,
+    gears: [11.5, 8.6, 7.0, 6.0, 5.3, 4.8],
+    brakeF: 2100, brakeR: 650, travelF: 0.13, travelR: 0.14, rake: 24.5, forkLen: 0.74,
+    grip: 1.15, lean: 1.05, sound: 'vtwin',
+    paint: '#ff7a1a', paint2: '#141414', rim: '#ff7a1a'
+  },
+  {
+    id: 'bastion', name: 'Bastion 1800', cls: 'Пауэр-круизер', price: 10000, style: 'chopper',
+    desc: 'Огромный V-твин с басом, от которого дрожат стёкла. Тяжёлый, но злой.',
+    wb: 1.70, rr: 0.33, rf: 0.33, mass: 300, com: [0.66, 0.44], gyr: 0.6,
+    torque: 165, peak: 4500, redline: 6800, idle: 850, curve: 0.18, cyl: 2,
+    gears: [9.6, 6.8, 5.3, 4.4, 3.8, 3.4],
+    brakeF: 1800, brakeR: 900, travelF: 0.12, travelR: 0.10, rake: 32, forkLen: 0.92,
+    grip: 1.45, lean: 0.95, sound: 'vtwin',
+    paint: '#3a0d0d', paint2: '#c9a24a', rim: '#141414'
+  },
+  {
+    id: 'spark', name: 'Spark E-Pit', cls: 'Электро-питбайк', price: 3500, style: 'electric',
+    desc: 'Маленький электрический хулиган: тишина и мгновенный удар момента.',
+    wb: 1.12, rr: 0.26, rf: 0.27, mass: 62, com: [0.48, 0.45], gyr: 0.43,
+    torque: 55, peak: 4000, redline: 9000, idle: 0, curve: 0, cyl: 0, electric: true,
+    gears: [11],
+    brakeF: 650, brakeR: 400, travelF: 0.16, travelR: 0.15, rake: 26, forkLen: 0.62,
+    grip: 1.05, lean: 1.1, sound: 'electric',
+    paint: '#13e0c4', paint2: '#141414', rim: '#ffffff'
   }
 ];
+
+BIKES.sort((a, b) => a.price - b.price);
 
 const UPGRADES = [
   { id: 'engine', name: 'Двигатель', hint: '+7% момента за уровень' },
@@ -162,7 +234,7 @@ function defaultSave() {
     coins: 600, bike: 'pika', bikes,
     rider: { helmet: '#f4f4f4', helmet2: '#d71f2b', hstyle: 'stripe', visor: '#1c2733', jacket: '#b3261e', pants: '#1d2433' },
     best: {}, bestWheelie: 0, bestWheelieDist: 0, totalRuns: 0,
-    settings: { music: 0.35, sfx: 0.9, manual: false, hints: true, test: false }
+    settings: { music: 0.35, sfx: 0.9, manual: false, hints: true, test: false, assist: true }
   };
 }
 let SAVE = loadSave();

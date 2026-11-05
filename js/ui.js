@@ -160,6 +160,7 @@ const UI = {
     $('#sMusic').value = s.music; $('#sSfx').value = s.sfx;
     $$('[data-man]').forEach(b => b.classList.toggle('on', (b.dataset.man === '1') === s.manual));
     $$('[data-hint]').forEach(b => b.classList.toggle('on', (b.dataset.hint === '1') === s.hints));
+    $$('[data-assist]').forEach(b => b.classList.toggle('on', (b.dataset.assist === '1') === (s.assist !== false)));
     document.body.classList.toggle('manual', s.manual);
   },
   buildCredits() {
@@ -209,6 +210,7 @@ $('#againBtn').onclick = () => UI.startRun(UI.lastTrack || TRACKS[0].id);
 $('#sMusic').oninput = e => { SAVE.settings.music = +e.target.value; Sound.setVolumes(SAVE.settings.music, SAVE.settings.sfx); saveGame(); };
 $('#sSfx').oninput = e => { SAVE.settings.sfx = +e.target.value; Sound.setVolumes(SAVE.settings.music, SAVE.settings.sfx); saveGame(); };
 $$('[data-man]').forEach(b => b.onclick = () => { SAVE.settings.manual = b.dataset.man === '1'; saveGame(); UI.syncSettings(); });
+$$('[data-assist]').forEach(b => b.onclick = () => { SAVE.settings.assist = b.dataset.assist === '1'; saveGame(); UI.syncSettings(); });
 $$('[data-hint]').forEach(b => b.onclick = () => { SAVE.settings.hints = b.dataset.hint === '1'; saveGame(); UI.syncSettings(); });
 $('#resetBtn').onclick = () => { if (confirm('Стереть монеты, мотоциклы и рекорды?')) { SAVE = defaultSave(); saveGame(); UI.toast('Прогресс сброшен'); UI.show('menu'); } };
 

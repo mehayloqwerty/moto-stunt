@@ -208,7 +208,7 @@ class Bike {
     const subs = 14, h = dt / subs, d = this.def;
     // плавные органы управления
     const ramp = (cur, tgt, up, dn) => cur < tgt ? Math.min(tgt, cur + up * dt) : Math.max(tgt, cur - dn * dt);
-    this.throttle = ramp(this.throttle, inp.gas, 5, 8);
+    this.throttle = this.inWheelie ? ramp(this.throttle, inp.gas, 14, 18) : ramp(this.throttle, inp.gas, 6, 9);
     this.brake = ramp(this.brake, inp.brake, 6, 10);
     this.lean = ramp(this.lean, inp.lean, 4.5, 4.5);
     this.clutch = ramp(this.clutch, inp.clutch, 12, 6);
@@ -313,7 +313,7 @@ class Bike {
     const wr = this.wr, wf = this.wf;
     const Gr = this.G;
     const rpm = this.we * 30 / Math.PI;
-    const thr = this.shiftT > 0.04 ? 0 : this.throttle;
+    const thr = this.shiftT > 0.04 && !this.inWheelie ? 0 : this.throttle;
     const te = this.engineTorque(rpm, thr);
     this.we = Math.max(0, this.we + te / this.Ie * h);
     let engage = 1;

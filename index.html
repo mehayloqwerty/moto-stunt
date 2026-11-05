@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=9">
+<link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -89,6 +89,7 @@
     <label class="row">Звук мотора <input type="range" id="sSfx" min="0" max="1" step="0.05"></label>
     <label class="row">Коробка передач
       <span class="seg"><button data-man="0">АВТО</button><button data-man="1">РУЧНАЯ</button></span></label>
+    <label class="row">Стант-ассист (держит баланс в вилли) <span class="seg"><button data-assist="1">ВКЛ</button><button data-assist="0">ВЫКЛ</button></span></label>
     <label class="row">Подсказки в заезде <span class="seg"><button data-hint="1">ВКЛ</button><button data-hint="0">ВЫКЛ</button></span></label>
     <div class="row"><span>Прогресс</span><button class="btn small danger" id="resetBtn">СБРОСИТЬ</button></div>
   </div>
@@ -99,6 +100,7 @@
   <div class="bar"><button class="btn back" data-go="menu">◀</button><h2>КАК ИГРАТЬ</h2><div></div></div>
   <div class="panel narrow help">
     <p><b>Вилли.</b> Дай газу — переднее колесо поднимется. Держи его в <span class="g">зелёной зоне</span> индикатора угла: это точка баланса, там очки идут ×1.6. Перевалил в красную — падение.</p>
+    <p><b>Стант-ассист (включён).</b> Подними колесо: газ + назад. Дальше просто держи газ — байк сам ловит баланс. Назад — выше, к «12 часам», вперёд — ниже, отпустил газ или тормоз — колесо опускается. Выключить можно в настройках.</p>
     <p><b>Как ловить баланс.</b> Колесо падает — добавь газ или отклонись назад. Колесо задирается — сбрось газ, нажми тормоз (задний опустит перед) или наклонись вперёд.</p>
     <p><b>Сцепление.</b> Выжми сцепление, раскрути мотор и резко отпусти — тяжёлые байки встанут на заднее колесо.</p>
     <p><b>Трюки.</b> Вилли, «12 часов» (почти вертикально), стоппи (резко тормози на скорости). Несколько трюков подряд — комбо с множителем до ×4. Упал — комбо сгорает.</p>
@@ -140,11 +142,11 @@
 <div id="rotate"><div class="phone">📱</div><p>Поверни телефон горизонтально</p></div>
 <div id="toast"></div>
 
-<script src="js/data.js?v=9"></script>
-<script src="js/physics.js?v=9"></script>
-<script src="js/draw.js?v=9"></script>
-<script src="js/audio.js?v=9"></script>
-<script src="js/game.js?v=9"></script>
-<script src="js/ui.js?v=9"></script>
+<script src="js/data.js?v=12"></script>
+<script src="js/physics.js?v=12"></script>
+<script src="js/draw.js?v=12"></script>
+<script src="js/audio.js?v=12"></script>
+<script src="js/game.js?v=12"></script>
+<script src="js/ui.js?v=12"></script>
 </body>
 </html>

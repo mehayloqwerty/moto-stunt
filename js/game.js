@@ -150,7 +150,9 @@ const Game = {
     const inp = readInput();
     const sdt = dt * this.slowmo;
     this.slowmo = Math.min(1, this.slowmo + dt * 0.6);
-    const ctrl0 = r.finished ? { gas: 0, brake: 0.6, lean: 0, clutch: 0 } : inp;
+    let ctrl0 = r.finished ? { gas: 0, brake: 0.6, lean: 0, clutch: 0 } : inp;
+    b.inWheelie = false;
+    if (!r.finished && !b.crashed && SAVE.settings.assist !== false) ctrl0 = this.assist(inp, b, dt);
     b.step(sdt, ctrl0, !SAVE.settings.manual);
     if (this.rag) this.rag.step(sdt, ter);
     r.time += r.finished ? 0 : sdt;
@@ -216,6 +218,36 @@ const Game = {
     for (const p of this.popups) p.t += dt;
     this.popups = this.popups.filter(p => p.t < 1.8);
     if (this.hint > 0 && (Input.gas || Input.lean)) this.hint -= dt;
+  },
+  // стант-ассист: держишь газ — байк сам ловит точку баланса (как опытный райдер газом и задним тормозом).
+  // Назад — выше, к «12 часам»; вперёд — ниже; отпустил газ — колесо опускается.
+  assist(inp, b, dt) {
+    const out = { gas: inp.gas, brake: inp.brake, lean: inp.lean, clutch: inp.clutch };
+    const pitch = b.a - Math.atan(this.ter.slopeAt(b.wr.x));
+    const rearOn = b.wr.contact || b.wr.air < 0.05;
+    const frontUp = !b.wf.contact && b.wf.air > 0.03;
+    this.kickT = Math.max(0, (this.kickT || 0) - dt); this.kickCD = Math.max(0, (this.kickCD || 0) - dt);
+    // подъём: газ + назад → автоматический «клатч-кик»
+    if (inp.gas && inp.lean < 0 && b.wf.contact && pitch < 0.06 && b.speed > 0.5 && this.kickCD <= 0 && !b.def.electric) { this.kickT = 0.28; this.kickCD = 1.4; }
+    // колесо проседает в вилли — короткий клатч-кик, чтобы подбросить его обратно
+    // подъём на высокой передаче: коробка сама сбрасывает вниз, как стантёр
+    if (inp.gas && inp.lean < 0 && b.wf.contact && !SAVE.settings.manual && b.gear > 0 && b.shiftT <= 0) {
+      const wr = -b.wr.w * 30 / Math.PI;
+      if (wr * b.def.gears[b.gear - 1] < b.def.redline * 0.85) b.shift(-1);
+    }
+    if (this.kickT > 0) out.clutch = 1;
+    if (rearOn && frontUp && pitch > 0.08 && inp.gas && !inp.brake) {
+      b.inWheelie = true;
+      const target = Math.min(1.35, b.balance + 0.03 - inp.lean * 0.3);
+      const e = target - pitch;
+      this.assistI = Math.max(-0.5, Math.min(0.6, (this.assistI || 0) + e * dt * 3));
+      const u = 0.2 + this.assistI + 4.5 * e - 1.3 * b.w;
+      out.gas = Math.max(0, Math.min(1, u));
+      out.brake = u < 0 ? Math.min(1, -u * 1.5) : 0;
+      out.lean = inp.lean * 0.35 + Math.max(-1, Math.min(1, -e * 2 + b.w * 0.6)) * 0.5;
+      out.clutch = 0;
+    } else if (!frontUp) this.assistI = 0;
+    return out;
   },
   tricks(dt, pitch, kmh) {
     const b = this.bike, r = this.run;
@@ -416,7 +448,7 @@ const Game = {
     if (this.hint > 0) {
       ctx.globalAlpha = Math.min(1, this.hint);
       ctx.font = font(u * 1.9); ctx.fillStyle = '#fff';
-      const lines = touch ? ['ГАЗ поднимает переднее колесо', '◀ отклониться назад · ▶ наклониться вперёд', 'ТОРМОЗ в вилли опускает колесо'] : ['↑ газ · ↓ тормоз · ← → наклон корпуса', 'Пробел — сцепление (выжми, дай газу, отпусти)', 'R — заново · Esc — пауза' + (SAVE.settings.manual ? ' · Q/E — передачи' : '')];
+      const lines = touch ? ['ГАЗ + ◀ НАЗАД — поднять колесо', 'Держи ГАЗ — ассист держит баланс', '◀ выше · ▶ ниже · ТОРМОЗ — опустить'] : ['↑ + ← — поднять колесо · держи ↑ — баланс', '← выше · → ниже · ↓ тормоз · Пробел — сцепление', 'R — заново · Esc — пауза' + (SAVE.settings.manual ? ' · Q/E — передачи' : '')];
       lines.forEach((l, i) => { ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = u * 0.4; ctx.strokeText(l, W / 2, H * 0.14 + u * 2 + i * u * 2.6); ctx.fillText(l, W / 2, H * 0.14 + u * 2 + i * u * 2.6); });
       ctx.globalAlpha = 1;
     }

@@ -64,13 +64,25 @@ const Sound = (() => {
       eng = e; return;
     }
     // цепочка: импульсы → перегруз → «труба» (НЧ-фильтр) → бас-полка → резонанс глушителя → выход
-    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 0.9 + loud * 1.6;
-    const shelf = ctx.createBiquadFilter(); shelf.type = 'lowshelf'; shelf.frequency.value = 140; shelf.gain.value = 7 + loud * 9;
-    const body = ctx.createBiquadFilter(); body.type = 'peaking'; body.Q.value = 1.3; body.gain.value = 5 + loud * 5;
-    body.frequency.value = e.kind === 'vtwin' ? 70 : e.kind === 'single' ? 95 : e.kind === 'triple' ? 140 : 190;
-    const ws = ctx.createWaveShaper(); ws.curve = shaper(0.35 + loud * 0.7); ws.oversample = '2x';
-    const pre = ctx.createGain(); pre.gain.value = 0.9;
-    pre.connect(ws); ws.connect(lp); lp.connect(shelf); shelf.connect(body); body.connect(out);
+    const pipeF = e.kind === 'vtwin' ? 52 : e.kind === 'single' ? 68 : e.kind === 'triple' ? 88 : 110; // резонанс трубы
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 0.8 + loud * 1.4;
+    const shelf = ctx.createBiquadFilter(); shelf.type = 'lowshelf'; shelf.frequency.value = 150; shelf.gain.value = 9 + loud * 8;
+    // «грудь» 2-й гармоники трубы — бас, который слышно даже из динамика телефона
+    const body = ctx.createBiquadFilter(); body.type = 'peaking'; body.Q.value = 1.1; body.gain.value = 8 + loud * 5; body.frequency.value = pipeF * 2.2;
+    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 28;
+    const ws = ctx.createWaveShaper(); ws.curve = shaper(0.5 + loud * 0.8); ws.oversample = '2x';
+    const pre = ctx.createGain(); pre.gain.value = 1.0;
+    // труба/глушитель: отклик из затухающих резонансов
+    const conv = ctx.createConvolver(); conv.normalize = true;
+    { const sr = ctx.sampleRate, len = Math.floor(sr * (0.18 + loud * 0.17)), ir = ctx.createBuffer(1, len, sr), dd = ir.getChannelData(0);
+      const tau = 0.05 + loud * 0.07;
+      for (let i = 0; i < len; i++) { const t = i / sr, env = Math.exp(-t / tau);
+        dd[i] = env * (Math.sin(2 * Math.PI * pipeF * t) + 0.6 * Math.sin(2 * Math.PI * pipeF * 2.03 * t) + 0.3 * Math.sin(2 * Math.PI * pipeF * 3.1 * t)) + (Math.random() * 2 - 1) * Math.exp(-t / 0.004) * 0.6; }
+      conv.buffer = ir; }
+    const dry = ctx.createGain(); dry.gain.value = 0.55;
+    const wet = ctx.createGain(); wet.gain.value = 1.1 + loud * 0.6;
+    pre.connect(ws); ws.connect(lp); lp.connect(shelf); shelf.connect(body); body.connect(hp);
+    hp.connect(dry); dry.connect(out); hp.connect(conv); conv.connect(wet); wet.connect(out);
     // основной поток импульсов + слегка расстроенный двойник (неровность вспышек)
     const wave = exhaustWave(e.kind);
     const o1 = ctx.createOscillator(); o1.setPeriodicWave(wave);
@@ -131,11 +143,11 @@ const Sound = (() => {
     eng.o1.frequency.setTargetAtTime(f0, t, tc);
     eng.o2.frequency.setTargetAtTime(f0, t, tc);
     eng.sub.frequency.setTargetAtTime(Math.min(160, f0 * nf), t, tc);
-    eng.subG.gain.setTargetAtTime((0.22 + 0.25 * throttle) * (1 - r * 0.5) * (1 + loud * 0.6), t, 0.05);
+    eng.subG.gain.setTargetAtTime((0.3 + 0.3 * throttle) * (1 - r * 0.45) * (1 + loud * 0.6), t, 0.05);
     // на газу «труба» открывается: больше верхов и баса, без газа — глухой рокот
     const sporty = eng.kind === 'inline4' ? 1.5 : eng.kind === 'triple' ? 1.2 : eng.kind === 'single' ? 1 : 0.7;
-    eng.lp.frequency.setTargetAtTime((180 + 500 * r * sporty + 1700 * throttle * (0.35 + r) * sporty) * (1 + loud * 0.35), t, tc);
-    eng.shelf.gain.setTargetAtTime(6 + loud * 9 + throttle * 4, t, 0.05);
+    eng.lp.frequency.setTargetAtTime((380 + 600 * r * sporty + 1900 * throttle * (0.35 + r) * sporty) * (1 + loud * 0.35), t, tc);
+    eng.shelf.gain.setTargetAtTime(9 + loud * 8 + throttle * 4, t, 0.05);
     eng.bp.frequency.setTargetAtTime(400 + 1800 * r, t, tc);
     eng.ng.gain.setTargetAtTime(0.02 + throttle * 0.08 * (0.4 + r), t, tc);
     let vol = (0.22 + 0.3 * throttle + 0.18 * r) * (0.9 + loud * 0.7);

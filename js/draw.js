@@ -451,7 +451,7 @@ function drawBike(ctx, pose, cfg, rider, flame) {
     ctx.restore();
   }
   if (sh.low) drawExhaust(ctx, sh, def, cfg, sx);
-  if (sh.cage) { for (const cg of sh.cage) for (let k = 0; k < cg.length - 1; k++) limb(ctx, [cg[k][0] * sx, cg[k][1]], [cg[k + 1][0] * sx, cg[k + 1][1]], 0.038, 0.038, '#c9ced6'); }
+  if (sh.cage && !def.noCage) { for (const cg of sh.cage) for (let k = 0; k < cg.length - 1; k++) limb(ctx, [cg[k][0] * sx, cg[k][1]], [cg[k + 1][0] * sx, cg[k + 1][1]], 0.038, 0.038, '#c9ced6'); }
   if (sh.light) {
     const L = sh.light; const lx = L[0] * sx;
     const hg2 = ctx.createRadialGradient(lx - 0.02, L[1] + 0.03, 0.01, lx, L[1], L[2] * 1.15); hg2.addColorStop(0, '#6b7079'); hg2.addColorStop(1, '#16181c');
